@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Interest Calculation Wizard Form (MOD-03 updated) -->
+    <record id="view_loan_interest_form" model="ir.ui.view">
+        <field name="name">microfinance.loan.interest.form</field>
+        <field name="model">microfinance.loan.interest</field>
+        <field name="arch" type="xml">
+            <form string="Interest Calculation">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Microfinance Interest Calculation</h2>
+                    </div>
+
+                    <!-- Parameters -->
+                    <group string="Calculation Parameters">
+                        <group>
+                            <field name="partner_id"
+                                   placeholder="Leave empty for all parties"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="interest_income_account_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Action Buttons -->
+                    <div style="margin-bottom:16px;">
+                        <button name="action_compute"
+                                string="Compute Interest"
+                                type="object"
+                                class="btn-primary"/>
+                        <button name="action_post_interest"
+                                string="Post Interest Accruals"
+                                type="object"
+                                class="btn-success"
+                                invisible="not computed"
+                                confirm="Post interest accrual vouchers for all lines?"/>
+
+                        <button name="action_proceed_to_payment"
+                                string="Record Interest Payment"
+                                type="object"
+                                class="btn-warning"
+                                invisible="not computed"
+                                help="Open the interest payment page with pre-filled data from this calculation."/>
+                    </div>
+
+                    <!-- Summary totals -->
+                    <group string="Summary" invisible="not computed">
+                        <group>
+                            <field name="total_disbursed" string="Total Closing Balance"/>
+                            <field name="total_interest"  string="Total Interest"/>
+                        </group>
+                        <group>
+                            <field name="total_per_lac"   string="Total Per Lac Interest"/>
+                        </group>
+                    </group>
+
+                    <!-- Accrued Interest Report -->
+                    <group string="Accrued Interest Report"
+                           invisible="not computed">
+                        <field name="line_ids" nolabel="1" readonly="1">
+                            <list>
+                                <field name="loan_party_id"     string="Party"/>
+                                <field name="opening_balance"   string="Opening Bal."/>
+                                <field name="closing_balance"   string="Closing Bal."/>
+                                <field name="unpaid_interest"   string="Unpaid Interest"
+                                       optional="show"/>
+                                <field name="effective_balance" string="Effective Bal."
+                                       optional="show"/>
+                                <field name="interest_rate"     string="Rate (%)"/>
+                                <field name="is_compound"       string="Compound"/>
+                                <field name="days"              string="Days"/>
+                                <field name="interest_amount"   string="Interest"
+                                       sum="Total Interest"/>
+                                <field name="per_lac_interest"  string="Per Lac"
+                                       sum="Total Per Lac" optional="show"/>
+                                <field name="cumulative_interest" string="Cumulative"
+                                       optional="show"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <field name="computed" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_loan_interest_wizard" model="ir.actions.act_window">
+        <field name="name">Calculate Interest</field>
+        <field name="res_model">microfinance.loan.interest</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

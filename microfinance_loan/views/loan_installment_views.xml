@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    
+    <record id="view_loan_installment_search" model="ir.ui.view">
+        <field name="name">microfinance.loan.installment.search</field>
+        <field name="model">microfinance.loan.installment</field>
+        <field name="arch" type="xml">
+            <search string="Search Installment Loans">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Running" name="running" domain="[('state','=','running')]"/>
+                <filter string="Closed" name="closed" domain="[('state','=','closed')]"/>
+                <separator/>
+                <filter string="EMI" name="emi" domain="[('loan_type','=','emi')]"/>
+                <filter string="Flat" name="flat" domain="[('loan_type','=','flat')]"/>
+                <separator/>
+                <filter string="Group by Customer" name="g_partner" context="{'group_by':'partner_id'}"/>
+                <filter string="Group by Type" name="g_type" context="{'group_by':'loan_type'}"/>
+                <filter string="Group by Frequency" name="g_freq" context="{'group_by':'frequency'}"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_loan_installment_schedule" model="ir.actions.act_window">
+        <field name="name">Unpaid Installments</field>
+        <field name="res_model">microfinance.loan.installment.line</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('state','!=','paid')]</field>
+    </record>
+
+    <record id="action_loan_installment_all" model="ir.actions.act_window">
+        <field name="name">Installment Loans</field>
+        <field name="res_model">microfinance.loan.installment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_loan_installment_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first Installment Loan!</p>
+            <p>Supports EMI (Reducing Balance) and Flat (Equal Principal).
+               Installments are generated one at a time after each payment.</p>
+        </field>
+    </record>
+
+    <record id="action_loan_installment_running" model="ir.actions.act_window">
+        <field name="name">Running Loans</field>
+        <field name="res_model">microfinance.loan.installment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state','=','running')]</field>
+    </record>
+
+  
+    <record id="view_partial_payment_form" model="ir.ui.view">
+        <field name="name">microfinance.loan.partial.payment.form</field>
+        <field name="model">microfinance.loan.partial.payment</field>
+        <field name="arch" type="xml">
+            <form string="Record Payment">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Record Installment Payment</h2>
+                    </div>
+
+                    <div class="alert alert-info" role="status">
+                        Review the due amount below. You may pay the full amount
+                        or enter a partial amount — any shortfall is carried forward
+                        to the next installment.
+                    </div>
+
+                    <group>
+                        <group string="Installment Summary">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="due_amount" widget="monetary" readonly="1"/>
+                            <field name="paid_so_far" widget="monetary" readonly="1" invisible="paid_so_far == 0"/>
+                            <field name="remaining_due" widget="monetary" readonly="1"/>
+                        </group>
+                        <group string="Payment">
+                            <field name="payment_date"/>
+                            <field name="paid_amount" widget="monetary"/>
+                            <field name="shortfall" widget="monetary" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-warning" role="status" invisible="shortfall == 0">
+                        <strong>Carry Forward:</strong>
+                        <field name="shortfall" widget="monetary" nolabel="1" readonly="1"/>
+                        will be added to the next installment.
+                    </div>
+
+                    <div class="alert alert-success" role="status" invisible="shortfall != 0">
+                        <strong>Full payment!</strong>
+                        The next installment will be created automatically after confirmation.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_confirm" string="Confirm Payment" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_loan_installment_form" model="ir.ui.view">
+        <field name="name">microfinance.loan.installment.form</field>
+        <field name="model">microfinance.loan.installment</field>
+        <field name="arch" type="xml">
+            <form string="Installment Loan">
+                <header>
+                 
+                    <button name="action_confirm" string="Confirm and Disburse" type="object" class="btn-primary" invisible="state != 'draft'" confirm="Confirm loan? The first installment will be created automatically."/>
+                    <button name="action_close" string="Close Loan" type="object" invisible="state != 'running'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state not in ('draft',)"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,running,closed"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_loan_installment_schedule)d" type="action" class="oe_stat_button" icon="fa-list-ol" invisible="line_count == 0">
+                            <field name="line_count" widget="statinfo" string="Schedule"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-check-circle" invisible="line_count == 0">
+                            <field name="paid_count" widget="statinfo" string="Paid"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- Loan Terms -->
+                    <group string="Loan Terms">
+                        <group>
+                            <field name="loan_party_id"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="loan_account_id" readonly="1"/>
+                            <field name="loan_type"/>
+                            <field name="date_start"/>
+                            <field name="date_end" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="principal_amount" widget="monetary"/>
+                            <field name="annual_interest_rate"/>
+                            <field name="frequency"/>
+                            <field name="duration"/>
+                        </group>
+                    </group>
+
+                    <!-- Summary -->
+                    <group string="Summary">
+                        <group>
+                            <field name="installment_amount" widget="monetary" string="1st Installment Amount"/>
+                            <field name="total_payment" widget="monetary"/>
+                            <field name="total_interest" widget="monetary"/>
+                        </group>
+                        <group invisible="state == 'draft'">
+                            <field name="outstanding_balance" widget="monetary"/>
+                            <field name="total_paid_principal" widget="monetary"/>
+                            <field name="total_paid_interest" widget="monetary"/>
+                        </group>
+                    </group>
+
+                    <!-- Accounting -->
+                    <group string="Accounting Configuration">
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="disbursement_account_id"/>
+                            <field name="interest_income_account_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Installment Schedule" name="schedule">
+                            <div class="alert alert-info" role="status" invisible="state != 'draft'">
+                                Installments are created one at a time automatically.
+                                The first installment is created when you confirm the loan.
+                                Each subsequent installment is created after the previous one is paid.
+                            </div>
+
+                            <field name="line_ids">
+                                <list decoration-success="state=='paid'" decoration-warning="state=='partial'" decoration-danger="state=='overdue'" decoration-muted="state=='paid'">
+                                    <field name="sequence" string="#"/>
+                                    <field name="date" string="Due Date"/>
+                                    <field name="date_end" string="Period End" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="principal" widget="monetary"/>
+                                    <field name="interest" widget="monetary"/>
+                                    <field name="emi_amount" widget="monetary" string="Due Amount"/>
+                                    <field name="outstanding_balance" widget="monetary" string="Balance"/>
+                                    <field name="paid_amount" widget="monetary" optional="show"/>
+                                    <field name="date_paid" optional="show"/>
+                                    <field name="early_payment" optional="show"/>
+                                    <field name="state" widget="badge" decoration-success="state=='paid'" decoration-warning="state=='partial'" decoration-danger="state=='overdue'"/>
+                                    
+                                    <button name="action_view_vouchers" string="Vouchers" type="object" icon="fa-book" invisible="not principal_voucher_id"/>
+                                   
+                                    <button name="action_pay" string="Pay" type="object" icon="fa-money" context="{'form_view_ref': 'your_module.view_partial_payment_form'}" invisible="state == 'paid'"/>
+                                    
+                                    <button name="action_pay_partial" string="Partial" type="object" icon="fa-minus-circle" invisible="state == 'paid'"/>
+                                    
+                                    <control>
+                                        <create invisible="1"/>
+                                    </control>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" placeholder="Add notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+        <!-- Installment Loan — List View -->
+ 
+    <record id="view_loan_installment_list" model="ir.ui.view">
+        <field name="name">microfinance.loan.installment.list</field>
+        <field name="model">microfinance.loan.installment</field>
+        <field name="arch" type="xml">
+            <list string="Installment Loans" decoration-success="state=='closed'" decoration-info="state=='running'" decoration-muted="state=='cancelled'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="loan_type"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="principal_amount" widget="monetary"/>
+                <field name="annual_interest_rate" string="Rate (%)"/>
+                <field name="frequency"/>
+                <field name="duration"/>
+                <field name="installment_amount" widget="monetary" string="Installment"/>
+                <field name="outstanding_balance" widget="monetary"/>
+                <field name="state" widget="badge" decoration-success="state=='closed'" decoration-info="state=='running'" decoration-warning="state=='draft'" decoration-danger="state=='cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+       <!-- Standalone List -->
+
+    <record id="view_installment_schedule_list" model="ir.ui.view">
+        <field name="name">microfinance.loan.installment.line.list</field>
+        <field name="model">microfinance.loan.installment.line</field>
+        <field name="arch" type="xml">
+            <list string="Installment Schedule" decoration-success="state=='paid'" decoration-warning="state=='partial'" decoration-danger="state=='overdue'">
+                <field name="loan_id"/>
+                <field name="sequence" string="#"/>
+                <field name="date" string="Due Date"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="principal" widget="monetary"/>
+                <field name="interest" widget="monetary"/>
+                <field name="emi_amount" widget="monetary" string="Due"/>
+                <field name="outstanding_balance" widget="monetary" string="Balance"/>
+                <field name="paid_amount" widget="monetary"/>
+                <field name="date_paid"/>
+                <field name="state" widget="badge" decoration-success="state=='paid'" decoration-warning="state=='partial'" decoration-danger="state=='overdue'"/>
+                <button name="action_pay" string="Pay" type="object" icon="fa-money" context="{'form_view_ref': 'your_module.view_partial_payment_form'}" invisible="state == 'paid'"/>
+                <button name="action_pay_partial" string="Partial" type="object" icon="fa-minus-circle" invisible="state == 'paid'"/>
+            </list>
+        </field>
+    </record>
+
+</odoo>

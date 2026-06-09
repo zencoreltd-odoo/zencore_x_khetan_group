@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_loan_voucher" model="ir.sequence">
+            <field name="name">Microfinance Loan Voucher</field>
+            <field name="code">microfinance.loan.voucher</field>
+            <field name="prefix">MLV/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_loan_installment" model="ir.sequence">
+            <field name="name">Microfinance Installment Loan</field>
+            <field name="code">microfinance.loan.installment</field>
+            <field name="prefix">INST/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

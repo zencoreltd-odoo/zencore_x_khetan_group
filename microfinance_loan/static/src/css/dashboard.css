@@ -1,0 +1,12 @@
+.o_microfinance_dashboard .o_kanban_card_header {
+    background-color: #1f4e79;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px 6px 0 0;
+}
+
+.o_microfinance_dashboard .o_stat_value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f4e79;
+}

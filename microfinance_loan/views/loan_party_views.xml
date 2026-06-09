@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--  List View  -->
+    <record id="view_loan_party_list" model="ir.ui.view">
+        <field name="name">microfinance.loan.party.list</field>
+        <field name="model">microfinance.loan.party</field>
+        <field name="arch" type="xml">
+            <list string="Loan Parties" decoration-muted="not active">
+                <field name="partner_id"/>
+                <field name="creation_date"/>
+                <field name="loan_account_id"/>
+                <field name="parent_account_id"/>
+                <field name="account_type"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="outstanding_loan_balance" widget="monetary" string="Outstanding Balance"/>
+                <field name="uncollected_interest" widget="monetary" string="Uncollected Interest"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Party Form-->
+    <record id="view_loan_party_form" model="ir.ui.view">
+        <field name="name">microfinance.loan.party.form</field>
+        <field name="model">microfinance.loan.party</field>
+        <field name="arch" type="xml">
+            <form string="Loan Party">
+                <header>
+                    <button name="action_create_loan_account"
+                            string="Create Loan Account"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="loan_account_id"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="partner_id"
+                                   placeholder="Select Customer / Party..."/>
+                        </h1>
+                    </div>
+
+                    <!-- MOD-01: 4 basic fields only -->
+                    <group string="Party Information">
+                        <group>
+                            <field name="parent_account_id"/>
+                            <field name="account_type"/>
+                        </group>
+                        <group>
+                            <field name="creation_date"/>
+                            <field name="loan_account_id" readonly="1"
+                                   invisible="not loan_account_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Loan Summary Dashboard -->
+                    <group string="Loan Summary" invisible="not loan_account_id">
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="total_loan_disbursed"     widget="monetary"/>
+                            <field name="total_principal_received"  widget="monetary"/>
+                            <field name="outstanding_loan_balance"  widget="monetary"/>
+                            <field name="interest_rate" string="Current Interest Rate (%)"/>
+                        </group>
+                        <group>
+                            <field name="total_interest_accrued"    widget="monetary"/>
+                            <field name="total_interest_collected"   widget="monetary"/>
+                            <field name="uncollected_interest"       widget="monetary"/>
+                            <field name="per_lac_amount" string="Per Lac Amount (30-day indicative)"/>
+                        </group>
+                    </group>
+
+                    <!-- Transaction History only — Interest & Loan Config tab removed -->
+                    <notebook invisible="not loan_account_id">
+                        <page string="Transaction History" name="transactions">
+                            <field name="loan_transaction_ids" readonly="1" nolabel="1">
+                                <list>
+                                    <field name="date"        string="Date"/>
+                                    <field name="description" string="Description"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="principal"   widget="monetary" string="Principal"/>
+                                    <field name="interest"    widget="monetary" string="Interest"/>
+                                    <field name="due_amount"  widget="monetary" string="Due Amount"/>
+                                    <field name="balance"     widget="monetary" string="Balance"/>
+                                    <field name="paid_amount" widget="monetary" string="Paid Amount"/>
+                                    <field name="paid_date"   string="Paid Date"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!--  Search View  -->
+    <record id="view_loan_party_search" model="ir.ui.view">
+        <field name="name">microfinance.loan.party.search</field>
+        <field name="model">microfinance.loan.party</field>
+        <field name="arch" type="xml">
+            <search string="Search Loan Parties">
+                <field name="partner_id" string="Customer"/>
+                <field name="loan_account_id" string="Loan Account"/>
+                <filter string="Compound Interest"
+                        name="compound"
+                        domain="[('is_compound_interest','=',True)]"/>
+                <filter string="No Loan Account"
+                        name="no_account"
+                        domain="[('loan_account_id','=',False)]"/>
+                <separator/>
+                <filter string="Group by Account Type"
+                        name="grp_account_type"
+                        context="{'group_by': 'account_type'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!--  Action — opens directly on Transaction History tab -->
+    <record id="action_loan_party" model="ir.actions.act_window">
+        <field name="name">Loan Parties</field>
+        <field name="res_model">microfinance.loan.party</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_loan_party_search"/>
+        <field name="context">{'default_active_tab': 'transactions'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Loan Party!
+            </p>
+            <p>Enter Party Name, Parent Account, Account Type and Creation Date.
+               The sub-ledger account will be created automatically.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_loan_party_manager,microfinance.loan.party manager,model_microfinance_loan_party,account.group_account_manager,1,1,1,1
+access_loan_party_user,microfinance.loan.party user,model_microfinance_loan_party,account.group_account_user,1,1,1,0
+access_loan_voucher_manager,microfinance.loan.voucher manager,model_microfinance_loan_voucher,account.group_account_manager,1,1,1,1
+access_loan_voucher_user,microfinance.loan.voucher user,model_microfinance_loan_voucher,account.group_account_user,1,1,1,0
+access_loan_interest,microfinance.loan.interest,model_microfinance_loan_interest,account.group_account_user,1,1,1,1
+access_loan_interest_line,microfinance.loan.interest.line,model_microfinance_loan_interest_line,account.group_account_user,1,1,1,1
+access_loan_dashboard_manager,microfinance.loan.dashboard manager,model_microfinance_loan_dashboard,account.group_account_manager,1,0,0,0
+access_loan_dashboard_user,microfinance.loan.dashboard user,model_microfinance_loan_dashboard,account.group_account_user,1,0,0,0
+access_loan_installment_mgr,microfinance.loan.installment manager,model_microfinance_loan_installment,account.group_account_manager,1,1,1,1
+access_loan_installment_usr,microfinance.loan.installment user,model_microfinance_loan_installment,account.group_account_user,1,1,1,0
+access_loan_inst_line_mgr,microfinance.loan.installment.line manager,model_microfinance_loan_installment_line,account.group_account_manager,1,1,1,1
+access_loan_inst_line_usr,microfinance.loan.installment.line user,model_microfinance_loan_installment_line,account.group_account_user,1,1,1,0
+access_loan_partial_payment,microfinance.loan.partial.payment,model_microfinance_loan_partial_payment,account.group_account_user,1,1,1,1
+access_loan_party_transaction_mgr,microfinance.loan.party.transaction manager,model_microfinance_loan_party_transaction,account.group_account_manager,1,1,1,1
+access_loan_party_transaction_usr,microfinance.loan.party.transaction user,model_microfinance_loan_party_transaction,account.group_account_user,1,0,0,0

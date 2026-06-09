@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_microfinance_root" name="Microfinance" sequence="80"/>
+
+    <!-- Dashboard -->
+    <menuitem id="menu_microfinance_dashboard"
+              name="Dashboard"
+              parent="menu_microfinance_root"
+              action="action_loan_dashboard_window"
+              sequence="5"/>
+
+    <!--  Installment Loans  -->
+    <menuitem id="menu_microfinance_installment"
+              name="Installment Loans"
+              parent="menu_microfinance_root"
+              sequence="8"/>
+
+    <menuitem id="menu_inst_all"
+              name="All Loans"
+              parent="menu_microfinance_installment"
+              action="action_loan_installment_all"
+              sequence="1"/>
+
+    <menuitem id="menu_inst_running"
+              name="Running Loans"
+              parent="menu_microfinance_installment"
+              action="action_loan_installment_running"
+              sequence="2"/>
+
+    <menuitem id="menu_inst_schedule"
+              name="Unpaid Installments"
+              parent="menu_microfinance_installment"
+              action="action_loan_installment_schedule"
+              sequence="3"/>
+
+    <!--  Flexible Loans  -->
+    <menuitem id="menu_microfinance_parties"
+              name="Loan Parties"
+              parent="menu_microfinance_root"
+              action="action_loan_party"
+              sequence="10"/>
+
+    <menuitem id="menu_microfinance_vouchers"
+              name="Vouchers"
+              parent="menu_microfinance_root"
+              sequence="20"/>
+
+    <menuitem id="menu_microfinance_all_vouchers"
+              name="All Vouchers"
+              parent="menu_microfinance_vouchers"
+              action="action_loan_voucher_all"
+              sequence="1"/>
+
+    <menuitem id="menu_microfinance_loan_payment"
+              name="Loan Disbursements"
+              parent="menu_microfinance_vouchers"
+              action="action_loan_payment"
+              sequence="2"/>
+
+    <menuitem id="menu_microfinance_loan_receive"
+              name="Loan Repayments"
+              parent="menu_microfinance_vouchers"
+              action="action_loan_receive"
+              sequence="3"/>
+
+    <menuitem id="menu_microfinance_interest_receive"
+              name="Interest Collections"
+              parent="menu_microfinance_vouchers"
+              action="action_interest_receive"
+              sequence="4"/>
+
+    <!-- Interest -->
+    <menuitem id="menu_microfinance_interest"
+              name="Interest"
+              parent="menu_microfinance_root"
+              sequence="30"/>
+
+    <menuitem id="menu_microfinance_calc_interest"
+              name="Calculate and Post Interest"
+              parent="menu_microfinance_interest"
+              action="action_loan_interest_wizard"
+              sequence="1"/>
+
+</odoo>

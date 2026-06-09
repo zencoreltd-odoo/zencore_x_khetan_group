@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View -->
+    <record id="view_loan_voucher_list" model="ir.ui.view">
+        <field name="name">microfinance.loan.voucher.list</field>
+        <field name="model">microfinance.loan.voucher</field>
+        <field name="arch" type="xml">
+            <list string="Loan Vouchers"
+                  decoration-success="state=='posted'"
+                  decoration-muted="state=='cancelled'"
+                  decoration-info="state=='draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="voucher_type"/>
+                <field name="partner_id"/>
+                <field name="loan_account_id" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount" widget="monetary"/>
+                <field name="journal_id" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state=='posted'"
+                       decoration-danger="state=='cancelled'"
+                       decoration-warning="state=='draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_loan_voucher_form" model="ir.ui.view">
+        <field name="name">microfinance.loan.voucher.form</field>
+        <field name="model">microfinance.loan.voucher</field>
+        <field name="arch" type="xml">
+            <form string="Loan Voucher">
+                <header>
+                    <button name="action_post" string="Post" type="object"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state == 'cancelled'"
+                            confirm="Cancel this voucher and its journal entry?"/>
+                    <button name="action_reset_draft" string="Reset to Draft"
+                            type="object" invisible="state != 'cancelled'"/>
+                    <button name="action_view_journal_entry"
+                            string="View Journal Entry" type="object"
+                            invisible="not move_id"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,posted"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Voucher"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <!--  Main two-column group  -->
+                    <group>
+                        <!-- LEFT: Transaction Details -->
+                        <group string="Transaction Details">
+                            <field name="voucher_type"/>
+                            <field name="partner_id"/>
+                            <field name="loan_party_id" readonly="1"/>
+                            <field name="loan_account_id" readonly="1"/>
+                            <field name="date"/>
+                        </group>
+
+                        <!-- RIGHT: Financial -->
+                        <group string="Financial">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount" widget="monetary"/>
+                            <field name="journal_id"/>
+                            <field name="contra_account_id"/>
+
+                            <field name="disburse_interest_rate"
+                                   string="Interest Rate (%)"
+                                   invisible="voucher_type != 'loan_payment' or interest_from_date"
+                                   required="voucher_type == 'loan_payment' and not interest_from_date"/>
+                            <field name="disburse_is_compound"
+                                   string="Compound Interest"
+                                   invisible="voucher_type != 'loan_payment' or interest_from_date"/>
+                            <field name="disburse_per_lac"
+                                   string="Per Lac (30-day)"
+                                   invisible="voucher_type != 'loan_payment' or interest_from_date"/>
+                        </group>
+                    </group>
+
+                    <group string="Disbursement Details"
+                           invisible="voucher_type != 'loan_payment' or interest_from_date">
+                        <group>
+                            <field name="loan_from_date" string="From Date"/>
+                            <field name="loan_to_date"   string="To Date"/>
+                            <field name="note" string="Remarks" placeholder="Remarks..."/>
+                        </group>
+                        <group>
+                            <field name="interest_frequency" string="Interest Frequency"/>
+                            <field name="loan_duration"      string="Duration" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- ═══ Interest Details — only for interest_receive ═══ -->
+                    <!-- <group string="Interest Details"
+                           invisible="voucher_type != 'interest_receive'">
+                        <group>
+                            <field name="interest_from_date"/>
+                            <field name="interest_to_date"/>
+                            <field name="days"/>
+                            <field name="interest_rate"/>
+                            <field name="is_compound"/>
+                        </group>
+                        <group>
+                            <field name="opening_balance" widget="monetary"/>
+                            <field name="closing_balance" widget="monetary"/>
+                        </group>
+                    </group> -->
+
+                    <!--  Remarks (for Repayment & Interest Collection)  -->
+                    <group invisible="voucher_type == 'loan_payment' and not interest_from_date">
+                        <field name="note" placeholder="Remarks..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_loan_voucher_search" model="ir.ui.view">
+        <field name="name">microfinance.loan.voucher.search</field>
+        <field name="model">microfinance.loan.voucher</field>
+        <field name="arch" type="xml">
+            <search string="Search Vouchers">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter string="Draft"     name="draft"
+                        domain="[('state','=','draft')]"/>
+                <filter string="Posted"    name="posted"
+                        domain="[('state','=','posted')]"/>
+                <filter string="Cancelled" name="cancelled"
+                        domain="[('state','=','cancelled')]"/>
+                <separator/>
+                <filter string="Loan Payment"
+                        name="f_payment"
+                        domain="[('voucher_type','=','loan_payment')]"/>
+                <filter string="Loan Receive"
+                        name="f_receive"
+                        domain="[('voucher_type','=','loan_receive')]"/>
+                <filter string="Interest Receive"
+                        name="f_interest"
+                        domain="[('voucher_type','=','interest_receive')]"/>
+                <separator/>
+                <filter string="Group by Partner"
+                        name="g_partner" context="{'group_by':'partner_id'}"/>
+                <filter string="Group by Type"
+                        name="g_type" context="{'group_by':'voucher_type'}"/>
+                <filter string="Group by Month"
+                        name="g_month" context="{'group_by':'date:month'}"/>
+                <filter string="Group by Status"
+                        name="g_state" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_loan_voucher_all" model="ir.actions.act_window">
+        <field name="name">All Vouchers</field>
+        <field name="res_model">microfinance.loan.voucher</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_loan_voucher_search"/>
+    </record>
+
+    <record id="action_loan_payment" model="ir.actions.act_window">
+        <field name="name">Loan Disbursements</field>
+        <field name="res_model">microfinance.loan.voucher</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('voucher_type','=','loan_payment'),
+                               ('interest_from_date','=',False)]</field>
+        <field name="context">{'default_voucher_type': 'loan_payment'}</field>
+    </record>
+
+    <record id="action_loan_receive" model="ir.actions.act_window">
+        <field name="name">Loan Repayments</field>
+        <field name="res_model">microfinance.loan.voucher</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('voucher_type','=','loan_receive')]</field>
+        <field name="context">{'default_voucher_type': 'loan_receive'}</field>
+    </record>
+
+    <record id="action_interest_receive" model="ir.actions.act_window">
+        <field name="name">Interest Collections</field>
+        <field name="res_model">microfinance.loan.voucher</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('voucher_type','=','interest_receive')]</field>
+        <field name="context">{'default_voucher_type': 'interest_receive'}</field>
+    </record>
+
+    <record id="action_interest_accruals" model="ir.actions.act_window">
+        <field name="name">Interest Accruals</field>
+        <field name="res_model">microfinance.loan.voucher</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('voucher_type','=','loan_payment'),
+                               ('interest_from_date','!=',False)]</field>
+    </record>
+
+</odoo>
